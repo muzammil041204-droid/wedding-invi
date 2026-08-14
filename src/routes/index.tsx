@@ -14,7 +14,6 @@ import { LocationSection } from "@/components/wedding/LocationSection";
 import { Gallery } from "@/components/wedding/Gallery";
 import { GiftSection } from "@/components/wedding/GiftSection";
 import { RSVPForm } from "@/components/wedding/RSVPForm";
-import { MusicToggle } from "@/components/wedding/MusicToggle";
 import { Footer } from "@/components/wedding/Footer";
 import { useScrollReveal } from "@/lib/reveal";
 
@@ -87,7 +86,6 @@ function Index() {
           <RSVPForm />
         </main>
         <Footer />
-        <MusicToggle autoPlay={entered} />
       </div>
     </>
   );
