@@ -12,7 +12,7 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
   const [opening, setOpening] = useState(false);
   const frameObj = useRef({ currentFrame: 0 });
 
-  /* ─── Draw specific frame onto canvas with cover aspect ratio ─── */
+  /* ─── Draw specific frame onto canvas with responsive mobile-optimized scaling ─── */
   const drawFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -27,8 +27,17 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
 
-    // Calculate aspect ratio cover
-    const scale = Math.max(cw / iw, ch / ih);
+    // Smart scale based on device orientation
+    // On portrait mobile screens, fit envelope with breathing margin so it is 100% clear and uncropped
+    const isPortrait = ch > cw;
+    let scale: number;
+
+    if (isPortrait) {
+      scale = Math.min((cw * 0.94) / iw, (ch * 0.82) / ih);
+    } else {
+      scale = Math.max(cw / iw, ch / ih);
+    }
+
     const nw = iw * scale;
     const nh = ih * scale;
     const cx = (cw - nw) / 2;
@@ -150,7 +159,10 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
         }
       }}
       aria-label="Click anywhere to open the wedding invitation cover"
-      className="fixed inset-0 z-[100] cursor-pointer select-none overflow-hidden bg-[#e0d8cc] flex items-center justify-center focus:outline-none"
+      className="fixed inset-0 z-[100] cursor-pointer select-none overflow-hidden flex items-center justify-center focus:outline-none"
+      style={{
+        background: "linear-gradient(145deg, #dcd7cc 0%, #cac5ba 50%, #b8b3a8 100%)",
+      }}
     >
       {/* High performance 60fps HTML5 Canvas renderer */}
       <canvas
