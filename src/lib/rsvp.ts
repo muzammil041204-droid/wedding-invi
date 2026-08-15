@@ -8,30 +8,44 @@ export type RsvpPayload = {
   notes: string;
 };
 
+export type RsvpRecord = RsvpPayload & {
+  id: string;
+  createdAt: string;
+};
+
 export type RsvpResult = { ok: true } | { ok: false; error: string };
 
-const STORAGE_KEY = "wedding-rsvp-submissions";
+const STORAGE_KEY = "wedding-rsvp-records";
 
-function submissionKey(payload: RsvpPayload) {
-  return `${payload.firstName.trim().toLowerCase()}|${payload.lastName.trim().toLowerCase()}`;
-}
-
-function readSubmitted(): string[] {
+function readRecords(): RsvpRecord[] {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as string[];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as RsvpRecord[];
   } catch {
     return [];
   }
 }
 
-/**
- * Single abstraction for RSVP delivery.
- * Swap the body of `send` for a Lovable Cloud insert into `wedding_rsvps`
- * when a backend is enabled — the UI does not change.
- */
+function writeRecords(records: RsvpRecord[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  } catch (err) {
+    console.error("Failed to save RSVP records:", err);
+  }
+}
+
 export const rsvpService = {
-  hasSubmitted(payload: RsvpPayload) {
-    return readSubmitted().includes(submissionKey(payload));
+  getAll(): RsvpRecord[] {
+    return readRecords();
+  },
+
+  hasSubmitted(payload: RsvpPayload): boolean {
+    const records = readRecords();
+    const key = `${payload.firstName.trim().toLowerCase()}|${payload.lastName.trim().toLowerCase()}`;
+    return records.some(
+      (r) => `${r.firstName.trim().toLowerCase()}|${r.lastName.trim().toLowerCase()}` === key
+    );
   },
 
   async send(payload: RsvpPayload): Promise<RsvpResult> {
@@ -40,13 +54,27 @@ export const rsvpService = {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      const existing = readSubmitted();
-      existing.push(submissionKey(payload));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const records = readRecords();
+      const newRecord: RsvpRecord = {
+        ...payload,
+        id: Math.random().toString(36).substring(2, 9),
+        createdAt: new Date().toISOString(),
+      };
+      records.unshift(newRecord);
+      writeRecords(records);
       return { ok: true };
     } catch {
       return { ok: false, error: "Something went wrong. Please try again in a moment." };
     }
+  },
+
+  deleteRecord(id: string): void {
+    const records = readRecords().filter((r) => r.id !== id);
+    writeRecords(records);
+  },
+
+  clearAll(): void {
+    writeRecords([]);
   },
 };
