@@ -62,12 +62,6 @@ export function Hero() {
           { opacity: 0, y: 12 },
           { opacity: 1, y: 0, duration: 1.0, stagger: 0.12, ease: "power2.out" },
           "-=0.8",
-        )
-        .fromTo(
-          "[data-hero='scroll']",
-          { opacity: 0 },
-          { opacity: 1, duration: 0.9 },
-          "-=0.5",
         );
 
       // Subtle parallax on desktop only to avoid mobile touch-scrolling jank
@@ -142,15 +136,6 @@ export function Hero() {
             {weddingData.location.city} · {weddingData.location.country}
           </p>
         </div>
-      </div>
-
-      <div
-        data-hero="scroll"
-        className="text-xs sm:text-sm font-medium tracking-widest uppercase relative z-10 mt-16 flex flex-col items-center gap-3 text-warmgray opacity-0"
-        aria-hidden="true"
-      >
-        <span>Scroll</span>
-        <span className="h-10 w-px animate-pulse bg-hairline" />
       </div>
     </section>
   );
