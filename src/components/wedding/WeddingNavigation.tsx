@@ -90,7 +90,7 @@ export function WeddingNavigation() {
       </header>
 
       <div
-        className={`fixed inset-0 z-60 bg-ivory transition-all duration-700 lg:hidden ${
+        className={`fixed inset-0 z-60 bg-ivory transition-all duration-500 ease-out lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         aria-hidden={!open}
@@ -112,8 +112,8 @@ export function WeddingNavigation() {
               key={l.id}
               type="button"
               onClick={() => go(l.id)}
-              style={{ transitionDelay: open ? `${120 + i * 60}ms` : "0ms" }}
-              className={`text-left font-serif text-4xl font-light text-ink transition-all duration-700 ${
+              style={{ transitionDelay: open ? `${60 + i * 40}ms` : "0ms" }}
+              className={`text-left font-serif text-4xl font-light text-ink transition-all duration-500 ${
                 open ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
               }`}
             >

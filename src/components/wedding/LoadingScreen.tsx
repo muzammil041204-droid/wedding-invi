@@ -27,16 +27,8 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
 
-    // Smart scale based on device orientation
-    // On portrait mobile screens, fit envelope with breathing margin so it is 100% clear and uncropped
-    const isPortrait = ch > cw;
-    let scale: number;
-
-    if (isPortrait) {
-      scale = Math.min((cw * 0.94) / iw, (ch * 0.82) / ih);
-    } else {
-      scale = Math.max(cw / iw, ch / ih);
-    }
+    // Responsive cover scale for all screen sizes ensuring full-bleed, un-letterboxed frame display
+    const scale = Math.max(cw / iw, ch / ih);
 
     const nw = iw * scale;
     const nh = ih * scale;
@@ -44,6 +36,8 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
     const cy = (ch - nh) / 2;
 
     ctx.clearRect(0, 0, cw, ch);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, cx, cy, nw, nh);
   }, []);
 
@@ -54,8 +48,9 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
 
     const updateCanvasSize = () => {
       if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
-        canvasRef.current.height = window.innerHeight * Math.min(window.devicePixelRatio || 1, 2);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvasRef.current.width = Math.round(window.innerWidth * dpr);
+        canvasRef.current.height = Math.round(window.innerHeight * dpr);
         drawFrame(Math.round(frameObj.current.currentFrame));
       }
     };
@@ -110,12 +105,12 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
         ease: "power2.out",
       })
 
-        // Phase 2: Smooth frame-by-frame animation from Frame 0 to Frame 131
+        // Phase 2: Smooth frame-by-frame animation from Frame 0 to Frame 131 (slowed down for elegant motion)
         .to(
           frameObj.current,
           {
             currentFrame: TOTAL_FRAMES - 1,
-            duration: 3.6,
+            duration: 4.8,
             ease: "power1.inOut",
             onUpdate: () => {
               const idx = Math.min(
@@ -128,15 +123,15 @@ export function LoadingScreen({ onEnter }: { onEnter: () => void }) {
           "-=0.1"
         )
 
-        // Phase 3: Hold on final frame for 2 full seconds as requested
-        .to({}, { duration: 2.0 })
+        // Phase 3: Elegant pause on the final frame
+        .to({}, { duration: 1.6 })
 
         // Phase 4: Seamless continuous zoom & fade into the website Hero
         .to(
           containerRef.current,
           {
             opacity: 0,
-            scale: 1.04,
+            scale: 1.02,
             duration: 0.7,
             ease: "power2.inOut",
           }

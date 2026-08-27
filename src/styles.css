@@ -182,6 +182,9 @@
   opacity: 0;
   transform: translateY(18px);
   will-change: transform, opacity;
+  @media (max-width: 767px) {
+    transform: translateY(12px);
+  }
 }
 
 @utility link-underline {

@@ -8,57 +8,80 @@ export function Hero() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile = window.innerWidth < 768;
+
     const ctx = gsap.context(() => {
       if (reduced) {
-        gsap.set("[data-hero]", { opacity: 1, y: 0, scale: 1, clipPath: "inset(0%)" });
+        gsap.set("[data-hero]", { opacity: 1, y: 0, scale: 1, clipPath: "none" });
         return;
       }
+
       const tl = gsap.timeline({ delay: 0.15 });
+
+      if (isMobile) {
+        // Mobile-optimized hardware-accelerated reveal without aggressive clipPath cropping
+        tl.fromTo(
+          "[data-hero='image']",
+          { scale: 1.06, opacity: 0 },
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 1.8,
+            ease: "power2.out",
+          },
+        );
+      } else {
+        // Desktop cinematic inset clipPath reveal
+        tl.fromTo(
+          "[data-hero='image']",
+          { clipPath: "inset(10% 10% 10% 10%)", scale: 1.08, opacity: 0 },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            scale: 1,
+            opacity: 1,
+            duration: 2.2,
+            ease: "power3.out",
+          },
+        );
+      }
+
       tl.fromTo(
-        "[data-hero='image']",
-        { clipPath: "inset(12% 12% 12% 12%)", scale: 1.12, opacity: 0 },
-        {
-          clipPath: "inset(0% 0% 0% 0%)",
-          scale: 1,
-          opacity: 1,
-          duration: 2.2,
-          ease: "power3.out",
-        },
+        "[data-hero='eyebrow']",
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 1.1, ease: "power2.out" },
+        "-=1.3",
       )
         .fromTo(
-          "[data-hero='eyebrow']",
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 1.1, ease: "power2.out" },
-          "-=1.5",
-        )
-        .fromTo(
           "[data-hero='name']",
-          { opacity: 0, y: 26 },
-          { opacity: 1, y: 0, duration: 1.4, stagger: 0.22, ease: "power3.out" },
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 1.3, stagger: 0.2, ease: "power3.out" },
           "-=0.9",
         )
         .fromTo(
           "[data-hero='meta']",
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 1.1, stagger: 0.14, ease: "power2.out" },
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 1.0, stagger: 0.12, ease: "power2.out" },
           "-=0.8",
         )
         .fromTo(
           "[data-hero='scroll']",
           { opacity: 0 },
-          { opacity: 1, duration: 1 },
+          { opacity: 1, duration: 0.9 },
           "-=0.5",
         );
 
-      // subtle parallax
-      const onScroll = () => {
-        if (!imageWrap.current) return;
-        const y = window.scrollY * 0.12;
-        gsap.set(imageWrap.current, { y });
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      return () => window.removeEventListener("scroll", onScroll);
+      // Subtle parallax on desktop only to avoid mobile touch-scrolling jank
+      if (!isMobile) {
+        const onScroll = () => {
+          if (!imageWrap.current) return;
+          const y = window.scrollY * 0.12;
+          gsap.set(imageWrap.current, { y });
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+      }
     }, root);
+
     return () => ctx.revert();
   }, []);
 

@@ -17,19 +17,24 @@ export function useScrollReveal(deps: unknown[] = []) {
       return;
     }
 
+    const isMobile = window.innerWidth < 768;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           const el = entry.target as HTMLElement;
-          const delay = Number(el.dataset["revealDelay"] ?? 0);
-          el.style.transition = `opacity 1.1s cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 1.1s cubic-bezier(0.22,1,0.36,1) ${delay}ms`;
+          const rawDelay = Number(el.dataset["revealDelay"] ?? 0);
+          const delay = isMobile ? Math.min(rawDelay, 120) : rawDelay;
+          const duration = isMobile ? "0.85s" : "1.1s";
+          
+          el.style.transition = `opacity ${duration} cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform ${duration} cubic-bezier(0.22,1,0.36,1) ${delay}ms`;
           el.style.opacity = "1";
           el.style.transform = "none";
           observer.unobserve(el);
         });
       },
-      { rootMargin: "0px 0px -12% 0px", threshold: 0.08 },
+      { rootMargin: isMobile ? "0px 0px -4% 0px" : "0px 0px -10% 0px", threshold: 0.05 },
     );
 
     nodes.forEach((n) => observer.observe(n));

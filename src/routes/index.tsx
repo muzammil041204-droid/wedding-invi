@@ -43,6 +43,7 @@ function Index() {
   useEffect(() => {
     if (!entered) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) return;
 
     const lenis = new Lenis({ duration: 1.25, smoothWheel: true });
     let frame = 0;
